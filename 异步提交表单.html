@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>异步提交表单</title>
+	<style type="text/css">
+		#tip{
+			clear: both;
+		}
+		b{
+			float: left;
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			margin-right: 10px;
+			text-align: center;
+			line-height: 20px;
+		}
+		.r{
+			color:green;
+		}
+		.r b{
+			color:white;
+			background-color: green;
+		}
+		.w{
+			color:red;
+		}
+		.w b{
+			color:white;
+			background-color: red;
+		}
+	</style>
+</head>
+<body>
+	<p>
+		姓名：
+		<input type="text" id="xingming" />
+		<p id="tip" class="r">
+			 
+		</p>
+	</p>
+	<p>
+		年龄：
+		<input type="text" id="nianling" />
+	</p>
+	<p>
+		性别：
+		<input type="radio" name="sex" id="nan" checked/> 男
+		<input type="radio" name="sex" id="nv" /> 女
+	</p>
+	<p>
+		<input type="button" id="btn" value="提交"/>
+	</p>
+
+	<script type="text/javascript">
+		var btn = document.getElementById("btn");
+		var xingmingTxt = document.getElementById("xingming");
+		var nianlingTxt = document.getElementById("nianling");
+		var nan = document.getElementById("nan");
+		var nv = document.getElementById("nv");
+		var tip = document.getElementById("tip");
+
+		//当xingmingTxt失去焦点的时候做什么
+		xingmingTxt.onblur = function(){
+			//显示tip
+			tip.style.display = "block";
+			//得到值
+			var xingming = this.value;
+			//先验证正则
+			if(/[\>\<\!\@\#\$\%\^\&\*\(\)\,\.\+\=\_\-]/.test(xingming)){
+				tip.innerHTML = "<b>×</b> 名字中不能有怪异符号！";
+				tip.className = "w";
+				return;
+			}
+			//佛经！
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function(){
+				if(xhr.readyState == 4){
+					if(xhr.status>=200&&xhr.status<=300 || xhr.status == "304"){
+						if(xhr.responseText == "KEYISHIYONG"){
+							tip.innerHTML = "<b>√</b>恭喜，可以使用！";
+							tip.className = "r";
+						}else{
+							tip.innerHTML = "<b>×</b>对不起，已经被占用，换一个吧！";
+							tip.className = "w";
+						 }
+					}
+				}
+			}
+			xhr.open("GET","04_check.php?xingming=" + xingming , true);
+			xhr.send(null);
+		}
+
+		//当有焦点的时候，tip消失
+		xingmingTxt.onfocus = function(){
+			tip.style.display = "none";
+		}
+
+
+		//点击按钮之后要做什么
+		btn.onclick = function(){
+			//得到表单信息
+			var xingming = xingmingTxt.value;
+			var nianling = nianlingTxt.value;
+			var xingbie = nan.checked ? "男" : "女";
+
+			//Ajax佛经！
+			var xhr = new XMLHttpRequest();
+
+			xhr.onreadystatechange = function(){
+				if(xhr.readyState == 4){
+					if(xhr.status >= 200 && xhr.status < 300 || xhr.status == 304){
+						if(xhr.responseText == 1){
+							alert("恭喜表单成功提交！");
+						}else{
+							alert("失败！请稍后再试！");
+						}
+					}
+				}
+			}
+			//GET请求提交表单，此时要缀参数：
+			xhr.open("POST","04_chuli.php",true);
+		 	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+			xhr.send("xingming=" + xingming + "&nianling=" + nianling + "&xingbie=" + xingbie);
+		}
+	</script>
+</body>
+</html>
